@@ -2,31 +2,37 @@ const { get } = require('express/lib/response');
 const { Schema, model } = require('mongoose');
 const dateFormat = require('../utils/dateFormat');
 
-
-const validateEmail = function(email) {
-    const re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    return re.test(email)
-};
-
 const ThoughtSchema = new Schema(
     {
+        thoughtText: {
+            type: String,
+            required: true,
+            maxLength: 280
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now,
+            get: createdAtVal => dateFormat(createdAtVal)
+        },
         username: {
             type: String,
-            unique: true,
-            required: true,
-            trim: true
+            required: true
         },
-        email: {
-            type: String,
-            unique: true,
-            required: true,
-            validate: [validateEmail, 'Please fill a valid email address']
+        reactions: [reactionSchema]
+    },
+    {
+        toJSON: {
+            virtuals: true,
+            getters: true
         },
-        thoughts: {
-
-        },
-        friends: {
-
-        }
+        id: false
     }
 )
+
+ThoughtSchema.virtual('reactionCount').get(function() {
+    return this.reactions.length;
+});
+
+const Thought = model('Thought', ThoughtSchema)
+
+module.exports = Thought;

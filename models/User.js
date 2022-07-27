@@ -1,6 +1,5 @@
-const { get } = require('express/lib/response');
-const { Schema, model } = require('mongoose');
-const dateFormat = require('../utils/dateFormat');
+const { Schema, model, Types } = require('mongoose');
+
 
 
 const validateEmail = function(email) {
@@ -34,5 +33,19 @@ const UserSchema = new Schema(
                 ref: 'User'
             }
         ]
+    },
+    {
+        toJSON: {
+            virtuals: true,
+        },
+        id: false
     }
 )
+
+UserSchema.virtual('friendCount').get(function() {
+    return this.friends.length;
+});
+
+const User = model('User', UserSchema);
+
+module.exports = User;
